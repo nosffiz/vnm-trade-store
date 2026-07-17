@@ -15,6 +15,8 @@ import {
   Image as ImageIcon,
   Tag,
   FileText,
+  Upload,
+  X,
 } from 'lucide-react';
 import { supabase, type Product } from '@/lib/supabase';
 import { ADMIN_PASSWORD, CATEGORIES, CURRENCY_SYMBOL, formatPrice } from '@/lib/constants';
@@ -49,7 +51,9 @@ export default function AdminPage() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [featured, setFeatured] = useState(false);
   const [posting, setPosting] = useState(false);
   const [postSuccess, setPostSuccess] = useState(false);
@@ -101,6 +105,49 @@ export default function AdminPage() {
     router.push('/');
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setPostError('Please select a valid image file.');
+      return;
+    }
+
+    setPostError('');
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview('');
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type,
+      });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('products').getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
   const handlePostProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setPosting(true);
@@ -120,6 +167,24 @@ export default function AdminPage() {
       return;
     }
 
+    // Upload the selected image to the Supabase "products" storage bucket and
+    // use the resulting public URL for the product record.
+    let finalImageUrl: string | null = null;
+    if (imageFile) {
+      try {
+        setUploading(true);
+        finalImageUrl = await uploadImage(imageFile);
+      } catch (err) {
+        setPostError(
+          `Failed to upload image: ${err instanceof Error ? err.message : 'Unknown error'}`
+        );
+        setUploading(false);
+        setPosting(false);
+        return;
+      }
+      setUploading(false);
+    }
+
     const { data, error } = await supabase
       .from('products')
       .insert({
@@ -127,7 +192,7 @@ export default function AdminPage() {
         price: priceNum,
         category,
         description: description || null,
-        image_url: imageUrl || null,
+        image_url: finalImageUrl,
         featured,
       })
       .select()
@@ -146,7 +211,7 @@ export default function AdminPage() {
       setPrice('');
       setCategory('');
       setDescription('');
-      setImageUrl('');
+      clearImage();
       setFeatured(false);
       setTimeout(() => setPostSuccess(false), 3000);
     }
@@ -228,9 +293,6 @@ export default function AdminPage() {
               {authLoading ? 'Authenticating...' : 'Access Dashboard'}
             </Button>
 
-            <p className="text-center text-xs text-muted-foreground">
-              Demo password: <code className="font-mono text-foreground/80">vnmtrade-admin-2024</code>
-            </p>
           </form>
         </Card>
       </div>
@@ -356,29 +418,51 @@ export default function AdminPage() {
                   />
                 </div>
 
-                {/* Image URL */}
+                {/* Product Image upload */}
                 <div className="space-y-2">
                   <Label htmlFor="image" className="flex items-center gap-1.5">
                     <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                    Image URL
+                    Product Image
                   </Label>
-                  <Input
-                    id="image"
-                    type="url"
-                    placeholder="https://images.pexels.com/..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                  />
-                  {imageUrl && (
-                    <div className="mt-2 overflow-hidden rounded-lg border border-border/40">
-                      <img
-                        src={imageUrl}
-                        alt="Preview"
-                        className="h-32 w-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
+
+                  {!imagePreview ? (
+                    <label
+                      htmlFor="image"
+                      className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/60 bg-muted/30 px-4 py-8 text-center transition-colors hover:border-primary/50 hover:bg-muted/50"
+                    >
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <span className="text-sm font-medium">Tap to choose a photo</span>
+                      <span className="text-xs text-muted-foreground">
+                        Take a photo or pick from your gallery
+                      </span>
+                      <Input
+                        id="image"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={handleFileSelect}
                       />
+                    </label>
+                  ) : (
+                    <div className="relative overflow-hidden rounded-lg border border-border/40">
+                      <img
+                        src={imagePreview}
+                        alt="Selected product preview"
+                        className="h-40 w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={clearImage}
+                        className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background"
+                        aria-label="Remove selected image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      {imageFile && (
+                        <p className="truncate bg-background/80 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm">
+                          {imageFile.name}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -410,7 +494,11 @@ export default function AdminPage() {
                   ) : (
                     <Plus className="mr-2 h-5 w-5" />
                   )}
-                  {posting ? 'Posting...' : 'Post Product'}
+                  {uploading
+                    ? 'Uploading image...'
+                    : posting
+                      ? 'Posting...'
+                      : 'Post Product'}
                 </Button>
               </form>
             </Card>

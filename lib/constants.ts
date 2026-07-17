@@ -9,7 +9,14 @@ export const CATEGORIES = [
   { name: 'Smart Home', slug: 'smart-home' },
 ];
 
-export const ADMIN_PASSWORD = 'vnmtrade-admin-2024';
+// Sourced from an environment variable named ADMIN_PASSWORD.
+// NEXT_PUBLIC_ADMIN_PASSWORD is checked first because this value is validated
+// in a client component (client-side env vars must be prefixed with NEXT_PUBLIC_).
+// Falls back to the hardcoded password when no env var is configured.
+export const ADMIN_PASSWORD =
+  process.env.NEXT_PUBLIC_ADMIN_PASSWORD ||
+  process.env.ADMIN_PASSWORD ||
+  '2407235nmJ';
 
 export const CONTACT_EMAIL = 'Info@vnmtrade.com';
 

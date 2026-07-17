@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { formatPrice } from '@/lib/constants';
 import type { Product } from '@/lib/supabase';
 
 export default function ProductCard({
@@ -107,7 +108,7 @@ export default function ProductCard({
         )}
         <div className="mt-3 flex items-center justify-between">
           <span className="text-lg font-bold text-foreground">
-            ${displayPrice.toFixed(2)}
+            {formatPrice(displayPrice)}
           </span>
           <div className="flex items-center gap-0.5">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />

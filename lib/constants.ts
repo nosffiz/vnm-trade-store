@@ -12,3 +12,13 @@ export const CATEGORIES = [
 export const ADMIN_PASSWORD = 'vnmtrade-admin-2024';
 
 export const CONTACT_EMAIL = 'Info@vnmtrade.com';
+
+export const CURRENCY_SYMBOL = '৳';
+
+export function formatPrice(value: number): string {
+  const amount = Number.isFinite(value) ? value : 0;
+  return `${CURRENCY_SYMBOL}${amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}

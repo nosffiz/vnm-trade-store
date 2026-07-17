@@ -130,7 +130,7 @@ export default function AdminPage() {
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('products')
+      .from('storage')
       .upload(fileName, file, {
         cacheControl: '3600',
         upsert: false,
@@ -143,7 +143,7 @@ export default function AdminPage() {
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from('products').getPublicUrl(fileName);
+    } = supabase.storage.from('storage').getPublicUrl(fileName);
 
     return publicUrl;
   };

@@ -129,8 +129,11 @@ export default function AdminPage() {
     const ext = file.name.split('.').pop() || 'jpg';
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
+    const bucketName = 'products';
+    console.log('[v0] Uploading to Supabase bucket:', bucketName, '| file:', fileName);
+
     const { error: uploadError } = await supabase.storage
-      .from('storage')
+      .from(bucketName)
       .upload(fileName, file, {
         cacheControl: '3600',
         upsert: false,
@@ -143,7 +146,7 @@ export default function AdminPage() {
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from('storage').getPublicUrl(fileName);
+    } = supabase.storage.from(bucketName).getPublicUrl(fileName);
 
     return publicUrl;
   };

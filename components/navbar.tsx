@@ -84,8 +84,13 @@ export default function Navbar({
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-tech shadow-md transition-transform group-hover:scale-110">
                 <span className="text-lg font-bold text-white">V</span>
               </div>
-              <span className="hidden text-lg font-bold tracking-tight sm:block">
-                VNM<span className="text-primary">Trade</span>
+              <span className="hidden flex-col leading-tight sm:flex">
+                <span className="text-lg font-bold tracking-tight">
+                  VNM<span className="text-primary">Trade</span>
+                </span>
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  Next move with victory.
+                </span>
               </span>
             </Link>
 

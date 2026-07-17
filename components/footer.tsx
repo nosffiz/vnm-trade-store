@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import {
   Mail,
-  Phone,
-  MapPin,
   Facebook,
   Twitter,
   Instagram,
@@ -142,14 +140,6 @@ export default function Footer() {
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <span className="group-hover:underline">{CONTACT_EMAIL}</span>
                 </a>
-              </li>
-              <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>+1 (800) 555-0199</span>
-              </li>
-              <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <span>123 Tech Plaza, Suite 400, San Francisco, CA</span>
               </li>
             </ul>
           </div>

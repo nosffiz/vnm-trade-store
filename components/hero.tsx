@@ -49,7 +49,7 @@ export default function Hero() {
             {/* Trust badges */}
             <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 lg:justify-start">
               {[
-                { icon: Truck, label: 'Free Shipping', sub: 'On orders over $50' },
+                { icon: Truck, label: 'Free Shipping', sub: 'On orders over ৳5000' },
                 { icon: ShieldCheck, label: '2-Year Warranty', sub: 'On all products' },
                 { icon: Zap, label: 'Fast Delivery', sub: '2-3 business days' },
               ].map(({ icon: Icon, label, sub }) => (

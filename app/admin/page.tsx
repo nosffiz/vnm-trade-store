@@ -13,12 +13,11 @@ import {
   EyeOff,
   Loader2,
   Image as ImageIcon,
-  DollarSign,
   Tag,
   FileText,
 } from 'lucide-react';
 import { supabase, type Product } from '@/lib/supabase';
-import { ADMIN_PASSWORD, CATEGORIES } from '@/lib/constants';
+import { ADMIN_PASSWORD, CATEGORIES, CURRENCY_SYMBOL, formatPrice } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -305,15 +304,17 @@ export default function AdminPage() {
                 {/* Price */}
                 <div className="space-y-2">
                   <Label htmlFor="price" className="flex items-center gap-1.5">
-                    <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                    Price <span className="text-destructive">*</span>
+                    <span className="text-sm font-semibold text-muted-foreground">
+                      {CURRENCY_SYMBOL}
+                    </span>
+                    Price (Taka) <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="price"
                     type="number"
                     step="0.01"
                     min="0"
-                    placeholder="e.g. 99.99"
+                    placeholder="e.g. 9999.00"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     required
@@ -483,7 +484,7 @@ export default function AdminPage() {
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="font-bold">
-                        ${Number(product.price).toFixed(2)}
+                        {formatPrice(Number(product.price))}
                       </p>
                       <Button
                         variant="ghost"
